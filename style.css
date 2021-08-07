@@ -1,0 +1,48 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+.wrapper {
+	height: 100vh;
+}
+
+.wrapper, .cell {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.board, .cell {
+	border-radius: 5px;
+}
+
+.board {
+	padding: 10px;
+	background-color: #bbada0;
+	display: grid;
+	gap: 10px 10px;
+	grid-auto-flow: row;
+	grid-template-areas:
+		"cell cell cell cell"
+		"cell cell cell cell"
+		"cell cell cell cell"
+		"cell cell cell cell";
+}
+
+.cell {
+	width: 100px;
+	height: 100px;
+	font-family: "Clear Sans", "Helvetica Neue", Arial, sans-serif;
+	font-weight: 700;
+	color:  #776e65;
+	background-color: #cdc1b4;
+	user-select: none;
+}
+
+@media (max-width: 425px) {
+	.board {
+		width: 300px;
+		height: 300px;
+	}
+}
