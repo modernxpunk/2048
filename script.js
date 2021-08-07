@@ -147,13 +147,12 @@ function makeNewRowLeftOrUp(tmp) {
 		if (tmp[j] !== '' && tmp[j + 1] !== '' && tmp[j] === tmp[j + 1]) {
 			tmp[j] *= 2
 			tmp[j + 1] = ''
-			newRow.unshift(tmp[j])
+			newRow.push(tmp[j])
 		} else if (tmp[j] !== '') {
-			newRow.unshift(tmp[j])
+			newRow.push(tmp[j])
 		}
 	}
-	newRow = tmp
-	return Array(tmp.length - newRow.length).fill('').concat(newRow)
+	return newRow.concat(Array(tmp.length - newRow.length).fill(''))
 }
 
 function leftClick() {
@@ -233,16 +232,19 @@ document.addEventListener('keydown', e => {
 	const key = e.key
 	if (key === 'ArrowUp') {
 		upClick()
+		refresh()
 		generateNumber()
 	} else if (key === 'ArrowDown') {
 		downClick()
+		refresh()
 		generateNumber()
 	} else if (key === 'ArrowLeft') {
 		leftClick()
+		refresh()
 		generateNumber()
 	} else if (key === 'ArrowRight') {
 		rightClick()
+		refresh()
 		generateNumber()
 	}
-	refresh()
 })
