@@ -1,5 +1,6 @@
 const cells = document.querySelectorAll('.cell')
 const board = Array(cells.length ** .5).fill('').map(el => new Array(cells.length ** .5).fill(''))
+const size = board.length
 const number = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
 
 function getEmptyCells(cells) {
@@ -113,7 +114,7 @@ function generateNumber() {
 	const randomIntegerNumber = number[getRandomNumber(0, 2)]
 
 	cells[randomNum].innerHTML = randomIntegerNumber
-	board[Math.floor(randomNum / board.length)][randomNum % board.length] = randomIntegerNumber
+	board[Math.floor(randomNum / size)][randomNum % size] = randomIntegerNumber
 
 	Object.keys(config[randomIntegerNumber].styles).forEach(currentStyle => {
 		cells[randomNum].style[currentStyle] = config[randomIntegerNumber].styles[currentStyle]
@@ -156,10 +157,10 @@ function makeNewRowLeftOrUp(tmp) {
 }
 
 function leftClick() {
-	for (let i = 0; i < board.length; i++) {
-		let tmp = Array(board.length).fill('')
+	for (let i = 0; i < size; i++) {
+		let tmp = Array(size).fill('')
 		let k = 0
-		for (let j = 0; j < board.length; j++) {
+		for (let j = 0; j < size; j++) {
 			if (board[i][j] !== '') {
 				tmp[k] = board[i][j]
 				k++
@@ -170,27 +171,27 @@ function leftClick() {
 }
 
 function upClick() {
-	for (let i = 0; i < board.length; i++) {
-		let tmp = Array(board.length).fill('')
+	for (let i = 0; i < size; i++) {
+		let tmp = Array(size).fill('')
 		let k = 0
-		for (let j = 0; j < board.length; j++) {
+		for (let j = 0; j < size; j++) {
 			if (board[j][i] !== '') {
 				tmp[k] = board[j][i]
 				k++
 			}
 		}
 		tmp = makeNewRowLeftOrUp(tmp)
-		for (let j = 0; j < board.length; j++) {
+		for (let j = 0; j < size; j++) {
 			board[j][i] = tmp[j]
 		}
 	}
 }
 
 function rightClick() {
-	for (let i = 0; i < board.length; i++) {
-		let tmp = Array(board.length).fill('')
-		let k = board.length - 1
-		for (let j = board.length  - 1; j >= 0; j--) {
+	for (let i = 0; i < size; i++) {
+		let tmp = Array(size).fill('')
+		let k = size - 1
+		for (let j = size  - 1; j >= 0; j--) {
 			if (board[i][j] !== '') {
 				tmp[k] = board[i][j]
 				k--
@@ -201,17 +202,17 @@ function rightClick() {
 }
 
 function downClick() {
-	for (let i = 0; i < board.length; i++) {
-		let tmp = Array(board.length).fill('')
-		let k = board.length - 1
-		for (let j = board.length  - 1; j >= 0; j--) {
+	for (let i = 0; i < size; i++) {
+		let tmp = Array(size).fill('')
+		let k = size - 1
+		for (let j = size  - 1; j >= 0; j--) {
 			if (board[j][i] !== '') {
 				tmp[k] = board[j][i]
 				k--
 			}
 		}
 		tmp = makeNewRowRightOrDown(tmp)
-		for (let j = 0; j < board.length; j++) {
+		for (let j = 0; j < size; j++) {
 			board[j][i] = tmp[j]
 		}
 	}
@@ -228,22 +229,53 @@ function refresh() {
 	}
 }
 
+function isEnd() {
+	for (let i = 0; i < size; i++)
+		for (let j = 0; j < size; j++) {
+			if (board[i][j] === '')
+				return false
+			if (j !== size - 1 && board[i][j] === board[i][j + 1])
+				return false
+			if (i !== size - 1 && board[i][j] === board[i + 1][j])
+				return false
+		}
+	return true
+}
+
+function reset() {
+	for (let i = 0; i < size ** 2; i++) {
+		Object.keys(config[''].styles).forEach(currentStyle => {
+			cells[i].style[currentStyle] = config[''].styles[currentStyle]
+		})
+	}
+	for (let i = 0; i < size; i++) {
+		for (let j = 0; j < size; j++) {
+			board[i][j] = ''
+		}
+	}
+	new Promise((res, rej) => {
+		start()
+		res()
+	}).then(() => {
+		alert('game over')		
+	})
+}
+
 document.addEventListener('keydown', e => {
+	if (isEnd()) {
+		reset()
+		return
+	}
 	const key = e.key
-	if (key === 'ArrowUp') {
+	if (key === 'ArrowUp') 
 		upClick()
-		refresh()
-		generateNumber()
-	} else if (key === 'ArrowDown') {
+	else if (key === 'ArrowDown')
 		downClick()
-		refresh()
-		generateNumber()
-	} else if (key === 'ArrowLeft') {
+	else if (key === 'ArrowLeft')
 		leftClick()
-		refresh()
-		generateNumber()
-	} else if (key === 'ArrowRight') {
+	else if (key === 'ArrowRight')
 		rightClick()
+	if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
 		refresh()
 		generateNumber()
 	}
