@@ -3,6 +3,10 @@
 	padding: 0;
 }
 
+.wrapper {
+	margin-top: 50px;
+}
+
 .wrapper, .cell {
 	display: flex;
 	justify-content: center;
