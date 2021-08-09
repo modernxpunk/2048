@@ -16,93 +16,6 @@ function getEmptyCells(cells) {
 	return emptyCells
 }
 
-const config = {
-	'': {
-		styles: {
-			innerHTML: '',
-			color: '',
-			backgroundColor: '#cdc1b4'
-		}
-	},
-	2: {
-		styles: {
-			fontSize: '3.25em',
-			color: "#776e65",
-			backgroundColor: '#eee4da'
-		}
-	},
-	4: {
-		styles: {
-			fontSize: '3.25em',
-			color: "#776e65",
-			backgroundColor: '#eee1c9'
-		}
-	},
-	8: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#f3b27a'
-		}
-	},
-	16: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#f69664'
-		}
-	},
-	32: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#f77c5f'
-		}
-	},
-	64: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#f75f3b'
-		}
-	},
-	128: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#edd073'
-		}
-	},
-	256: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#edcc61'
-		}
-	},
-	512: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#edc850'
-		}
-	},
-	1024: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#edc53f'
-		}
-	},
-	2048: {
-		styles: {
-			fontSize: '3em',
-			color: "#f9f6f2",
-			backgroundColor: '#edc22e'
-		}
-	}
-}
-
 function getRandomNumber(min, max) {
 	return Math.floor(min + Math.random() * max)
 }
@@ -114,15 +27,18 @@ function getRandomEmptyCells(emptyCells) {
 
 function generateNumber() {
 	const emptyCells = getEmptyCells(cells)
-	const randomNum = getRandomEmptyCells(emptyCells)
-	const randomIntegerNumber = number[getRandomNumber(0, 2)]
+	if (emptyCells.length !== 0) {
+		const randomNum = getRandomEmptyCells(emptyCells)
+		const randomIntegerNumber = number[getRandomNumber(0, 2)]
 
-	cells[randomNum].innerHTML = randomIntegerNumber
-	board[Math.floor(randomNum / size)][randomNum % size] = randomIntegerNumber
+		cells[randomNum].innerHTML = randomIntegerNumber
+		board[Math.floor(randomNum / size)][randomNum % size] = randomIntegerNumber
 
-	Object.keys(config[randomIntegerNumber].styles).forEach(currentStyle => {
-		cells[randomNum].style[currentStyle] = config[randomIntegerNumber].styles[currentStyle]
-	})
+		Object.keys(config[randomIntegerNumber].styles).forEach(currentStyle => {
+			cells[randomNum].style[currentStyle] = config[randomIntegerNumber].styles[currentStyle]
+		})
+	}
+
 }
 
 function start() {
@@ -162,6 +78,16 @@ function makeNewRowLeftOrUp(tmp) {
 	return newRow
 }
 
+
+
+function fillBoard(prevBoard) {
+	for (let i = 0; i < size; i++) {
+		for (let j = 0; j < size; j++) {
+			board[i][j] = prevBoard[i][j]
+		}
+	}
+}
+
 function leftClick() {
 	for (let i = 0; i < size; i++) {
 		let tmp = Array(size).fill('')
@@ -172,7 +98,8 @@ function leftClick() {
 				k++
 			}
 		}
-		board[i] = makeNewRowLeftOrUp(tmp)
+		tmp = makeNewRowLeftOrUp(tmp)
+		board[i] = tmp
 	}
 }
 
@@ -203,7 +130,8 @@ function rightClick() {
 				k--
 			}
 		}
-		board[i] = makeNewRowRightOrDown(tmp)
+		tmp = makeNewRowRightOrDown(tmp)
+		board[i] = tmp
 	}
 }
 
@@ -236,15 +164,20 @@ function refresh() {
 }
 
 function isEnd() {
-	for (let i = 0; i < size; i++)
+	let without2048 = true
+	for (let i = 0; i < size; i++) {
 		for (let j = 0; j < size; j++) {
 			if (!board[i][j] ||
 				j !== size - 1 && board[i][j] === board[i][j + 1] ||
 				i !== size - 1 && board[i][j] === board[i + 1][j]
 			)
-				return false
+				without2048 = false
+			if (board[i][j] === 2048)
+				return true
 		}
-	return true
+
+	}
+	return without2048
 }
 
 function reset() {
@@ -257,15 +190,9 @@ function reset() {
 			board[i][j] = ''
 		}
 	}
-	start()
 }
 
 document.addEventListener('keydown', e => {
-	if (isEnd()) {
-		alert('game over')		
-		reset()
-		return
-	}
 	const key = e.key
 	if (key === 'ArrowUp') 
 		upClick()
@@ -278,6 +205,14 @@ document.addEventListener('keydown', e => {
 	if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
 		refresh()
 		generateNumber()
+		setTimeout(() => {
+			if (isEnd()) {
+				alert('game over')
+				reset()
+				start()
+				return
+			}
+		}, 0)
 	}
 })
 
@@ -320,8 +255,3 @@ document.addEventListener('touchmove', e => {
 	xDown = null
 	yDown = null
 }, false)
-
-/* 
-	1. уменьшить конфиг
-	2. проверить неизменность предыдещго хода, если неизменился, то не генерировать новую
-*/
