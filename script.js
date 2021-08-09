@@ -192,6 +192,17 @@ function reset() {
 	}
 }
 
+function isEndThenNewGame() {
+	setTimeout(() => {
+		if (isEnd()) {
+			alert('game over')
+			reset()
+			start()
+			return
+		}
+	}, 0)
+}
+
 document.addEventListener('keydown', e => {
 	const key = e.key
 	if (key === 'ArrowUp') 
@@ -205,14 +216,7 @@ document.addEventListener('keydown', e => {
 	if (key === 'ArrowUp' || key === 'ArrowDown' || key === 'ArrowLeft' || key === 'ArrowRight') {
 		refresh()
 		generateNumber()
-		setTimeout(() => {
-			if (isEnd()) {
-				alert('game over')
-				reset()
-				start()
-				return
-			}
-		}, 0)
+		isEndThenNewGame()
 	}
 })
 
@@ -223,11 +227,7 @@ document.addEventListener('touchstart', e => {
 }, false)
 
 document.addEventListener('touchmove', e => {
-	if (isEnd()) {
-		alert('game over')		
-		reset()
-		return
-	}
+	isEndThenNewGame()
 
 	if (!xDown || !yDown)
 		return
