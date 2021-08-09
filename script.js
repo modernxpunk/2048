@@ -3,6 +3,11 @@ const board = Array(cells.length ** .5).fill('').map(el => new Array(cells.lengt
 const size = board.length
 const number = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
 
+const getTouches = e => e.touches || e.originalEvent.touches
+
+let xDown = null
+let yDown = null
+
 function getEmptyCells(cells) {
 	const emptyCells = []
 	for (let i = 0; i < cells.length; i++)
@@ -16,7 +21,6 @@ const config = {
 		styles: {
 			innerHTML: '',
 			color: '',
-			fontSize: '0',
 			backgroundColor: '#cdc1b4'
 		}
 	},
@@ -131,29 +135,31 @@ start()
 function makeNewRowRightOrDown(tmp) {
 	let newRow = []
 	for (let j = tmp.length - 1; j >= 0; j--) {
-		if (tmp[j] !== '' && tmp[j - 1] !== '' && tmp[j] === tmp[j - 1]) {
+		if (tmp[j] && tmp[j - 1] && tmp[j] === tmp[j - 1]) {
 			tmp[j] *= 2
 			tmp[j - 1] = ''
 			newRow.unshift(tmp[j])
-		} else if (tmp[j] !== '') {
+		} else if (tmp[j]) {
 			newRow.unshift(tmp[j])
 		}
 	}
-	return Array(tmp.length - newRow.length).fill('').concat(newRow)
+	newRow = Array(tmp.length - newRow.length).fill('').concat(newRow)
+	return newRow
 }
 
 function makeNewRowLeftOrUp(tmp) {
 	let newRow = []
 	for (let j = 0; j <= tmp.length - 1; j++) {
-		if (tmp[j] !== '' && tmp[j + 1] !== '' && tmp[j] === tmp[j + 1]) {
+		if (tmp[j] && tmp[j + 1] && tmp[j] === tmp[j + 1]) {
 			tmp[j] *= 2
 			tmp[j + 1] = ''
 			newRow.push(tmp[j])
-		} else if (tmp[j] !== '') {
+		} else if (tmp[j]) {
 			newRow.push(tmp[j])
 		}
 	}
-	return newRow.concat(Array(tmp.length - newRow.length).fill(''))
+	newRow = newRow.concat(Array(tmp.length - newRow.length).fill(''))
+	return newRow
 }
 
 function leftClick() {
@@ -161,7 +167,7 @@ function leftClick() {
 		let tmp = Array(size).fill('')
 		let k = 0
 		for (let j = 0; j < size; j++) {
-			if (board[i][j] !== '') {
+			if (board[i][j]) {
 				tmp[k] = board[i][j]
 				k++
 			}
@@ -175,7 +181,7 @@ function upClick() {
 		let tmp = Array(size).fill('')
 		let k = 0
 		for (let j = 0; j < size; j++) {
-			if (board[j][i] !== '') {
+			if (board[j][i]) {
 				tmp[k] = board[j][i]
 				k++
 			}
@@ -192,7 +198,7 @@ function rightClick() {
 		let tmp = Array(size).fill('')
 		let k = size - 1
 		for (let j = size  - 1; j >= 0; j--) {
-			if (board[i][j] !== '') {
+			if (board[i][j]) {
 				tmp[k] = board[i][j]
 				k--
 			}
@@ -206,7 +212,7 @@ function downClick() {
 		let tmp = Array(size).fill('')
 		let k = size - 1
 		for (let j = size  - 1; j >= 0; j--) {
-			if (board[j][i] !== '') {
+			if (board[j][i]) {
 				tmp[k] = board[j][i]
 				k--
 			}
@@ -232,11 +238,10 @@ function refresh() {
 function isEnd() {
 	for (let i = 0; i < size; i++)
 		for (let j = 0; j < size; j++) {
-			if (board[i][j] === '')
-				return false
-			if (j !== size - 1 && board[i][j] === board[i][j + 1])
-				return false
-			if (i !== size - 1 && board[i][j] === board[i + 1][j])
+			if (!board[i][j] ||
+				j !== size - 1 && board[i][j] === board[i][j + 1] ||
+				i !== size - 1 && board[i][j] === board[i + 1][j]
+			)
 				return false
 		}
 	return true
@@ -244,25 +249,20 @@ function isEnd() {
 
 function reset() {
 	for (let i = 0; i < size ** 2; i++) {
-		Object.keys(config[''].styles).forEach(currentStyle => {
-			cells[i].style[currentStyle] = config[''].styles[currentStyle]
-		})
+		cells[i].innerHTML = ''
+		cells[i].style.backgroundColor = ''
 	}
 	for (let i = 0; i < size; i++) {
 		for (let j = 0; j < size; j++) {
 			board[i][j] = ''
 		}
 	}
-	new Promise((res, rej) => {
-		start()
-		res()
-	}).then(() => {
-		alert('game over')		
-	})
+	start()
 }
 
 document.addEventListener('keydown', e => {
 	if (isEnd()) {
+		alert('game over')		
 		reset()
 		return
 	}
@@ -280,3 +280,44 @@ document.addEventListener('keydown', e => {
 		generateNumber()
 	}
 })
+
+document.addEventListener('touchstart', e => {
+    const firstTouch = getTouches(e)[0]
+    xDown = firstTouch.clientX
+    yDown = firstTouch.clientY
+}, false)
+
+document.addEventListener('touchmove', e => {
+	if (isEnd()) {
+		alert('game over')		
+		reset()
+		return
+	}
+
+	if (!xDown || !yDown)
+		return
+
+	let xUp = e.touches[0].clientX
+	let yUp = e.touches[0].clientY
+
+	let xDiff = xDown - xUp;
+	let yDiff = yDown - yUp;
+
+	if (Math.abs(xDiff) > Math.abs(yDiff))
+		if (xDiff > 0)
+			leftClick() 
+		else
+			rightClick()
+	else 
+		if (yDiff > 0)
+			upClick()
+		else 
+			downClick()
+
+	refresh()
+	generateNumber()
+
+	xDown = null
+	yDown = null
+}, false)
+
