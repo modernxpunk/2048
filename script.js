@@ -10,7 +10,7 @@ let yDown = null
 
 function getEmptyCells(cells) {
 	const emptyCells = []
-	for (let i = 0; i < cells.length; i++)
+	for (let i = 0; i < size ** 2; i++)
 		if (!cells[i].innerHTML)
 			emptyCells.push(i)
 	return emptyCells
@@ -197,7 +197,7 @@ function rightClick() {
 	for (let i = 0; i < size; i++) {
 		let tmp = Array(size).fill('')
 		let k = size - 1
-		for (let j = size  - 1; j >= 0; j--) {
+		for (let j = size - 1; j >= 0; j--) {
 			if (board[i][j]) {
 				tmp[k] = board[i][j]
 				k--
@@ -211,7 +211,7 @@ function downClick() {
 	for (let i = 0; i < size; i++) {
 		let tmp = Array(size).fill('')
 		let k = size - 1
-		for (let j = size  - 1; j >= 0; j--) {
+		for (let j = size - 1; j >= 0; j--) {
 			if (board[j][i]) {
 				tmp[k] = board[j][i]
 				k--
@@ -226,7 +226,7 @@ function downClick() {
 
 function refresh() {
 	let boardNumber = board.flat()
-	for (let i = 0; i < boardNumber.length; i++) {
+	for (let i = 0; i < size ** 2; i++) {
 		const curNum = boardNumber[i]
 		cells[i].innerHTML = curNum
 		Object.keys(config[curNum].styles).forEach(currentStyle => {
